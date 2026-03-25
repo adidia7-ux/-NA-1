@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
+<title>קבוצת נהריה</title>
+<meta name="theme-color" content="#0a0a18"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'Segoe UI',Arial,sans-serif;direction:rtl;background:#0a0a18;min-height:100vh;overscroll-behavior:none;}
+  input,textarea,button{font-family:inherit;}
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:4px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+// ── תוכן ──────────────────────────────────────────────────────
+const CHAPTERS = [
+  {date:"19/03",title:"יום אחד בכל פעם",text:"הסוד הגדול של ההחלמה הוא פשוט: יום אחד בכל פעם. לא שבוע, לא חודש – רק היום הזה. כשמחשבות על 'לנצח' מציפות אותך, זכרי: את לא צריכה לנצח לנצח. את צריכה רק לנצח היום."},
+  {date:"20/03",title:"הכוח שבהודאה",text:"כשאמרנו בפעם הראשונה 'אני מכורה' – משהו נשבר. לא אנחנו נשברנו – הכחשה נשברה. ההודאה היא לא חולשה. היא הצעד הראשון לחיים אמיתיים."},
+  {date:"21/03",title:"אמונה בכוח גדול",text:"לא משנה מה תפיסתך לגבי כוח עליון – טבע, אנרגיה, אלוהים, הקבוצה עצמה. מה שחשוב הוא להאמין שיש משהו גדול מאיתנו שיכול לעזור."},
+  {date:"22/03",title:"שחרור שליטה",text:"ניסינו לשלוט בהכל ולא הצלחנו. כשנשחרר את הצורך לשלוט, נמצא פתאום מרחב לנשום. שחרור אינו כניעה – הוא חירות."},
+  {date:"23/03",title:"חשבון נפש",text:"לבחון את עצמנו ללא שיפוט הוא אומנות. לא להאשים, לא להצדיק – פשוט לראות. חשבון נפש כנה הוא מתנה שנותנת לעצמנו."},
+  {date:"24/03",title:"האמת המשחררת",text:"לספר לאדם אחד את כל האמת – זה מרפא. הסודות שאנו נושאות לבד הם שמכבידות עלינו. כשמשתפים – המשא נחלק."},
+  {date:"25/03",title:"מוכנות לשינוי",text:"לא נוכל לשנות את עצמנו לבד. אבל נוכל להיות מוכנות לשינוי. המוכנות בלבד פותחת דלת שלא ידענו שהיא שם."},
+  {date:"26/03",title:"הענווה",text:"לבקש עזרה זו לא חולשה – זו ענווה. הענווה היא הבסיס של כל צמיחה רוחנית. אנחנו לא צריכות לדעת הכל, לשלוט בהכל, לנהל הכל."},
+  {date:"27/03",title:"תיקון עוולות",text:"כשאנחנו מוכנות לתקן – אנחנו משתחררות. לא בגלל שהאחר זקוק לסליחה שלנו, אלא כי אנחנו זקוקות לשחרר את הכבד שנשאנו."},
+  {date:"28/03",title:"הצעד הקשה",text:"לגשת אל אנשים שפגענו בהם דורש אומץ אדיר. לא תמיד ניתן לתקן ישירות. אבל הכוונה, המוכנות, הלב הפתוח – אלה כבר תיקון."},
+  {date:"29/03",title:"ערנות יומית",text:"ההחלמה היא תהליך יומי. גם היום נבחן את עצמנו: האם פגענו? האם אנחנו ישרות? ערנות יומית מונעת הצטברות של כאב ואשמה."},
+  {date:"30/03",title:"תפילה ומדיטציה",text:"לא חייבים להאמין בדת כדי להתפלל. תפילה היא שיחה עם עצמנו, עם מה שגדול מאיתנו. דקות של שקט ביום יכולות לשנות את כל היום."},
+  {date:"31/03",title:"העברת המסר",text:"כשנושאות את המסר הלאה – אנחנו מתרפאות גם. לעזור לאחרת היא לא רק מתנה לה – היא מתנה לנו. בשירות אנחנו מוצאות משמעות."},
+  {date:"01/04",title:"ההכרת תודה",text:"אפילו ביום הקשה ביותר – יש על מה להודות. שלושה דברים בכל בוקר שאנחנו אסירות תודה עליהם יכולים לשנות את כל נקודת המבט."},
+  {date:"02/04",title:"חמלה עצמית",text:"אנחנו פעמים רבות אכזריות כלפי עצמנו. היינו מדברות ככה לחברה? לא. אז למה לעצמנו? חמלה עצמית היא לא פינוק – היא תנאי בסיסי לריפוי."},
+];
+const INSPIRATIONS = [
+  {date:"19/03",text:"את חזקה יותר ממה שאת חושבת. הגעת עד כאן – תמשיכי. 💙"},
+  {date:"20/03",text:"כל בוקר שאת פוקחת עיניים ניקייה – זה נצחון. חגגי אותו."},
+  {date:"21/03",text:"האנשים שנפלו הכי עמוק – הם שיכולים לעלות הכי גבוה."},
+  {date:"22/03",text:"אין כישלון בהחלמה. יש רק ניסיונות ולקחים. תמשיכי ללמוד."},
+  {date:"23/03",text:"הדרך הכי אמיצה היא לבקש עזרה. עשית זאת – את אמיצה."},
+  {date:"24/03",text:"לא חייבים לראות את כל הדרך. מספיק לראות את הצעד הבא."},
+  {date:"25/03",text:"את לא לבד. אנחנו כאן, לפניך היו כאלה, אחריך יהיו. 🤝"},
+  {date:"26/03",text:"שינוי אמיתי קורה לאט. תני לעצמך זמן. תני לעצמך חסד."},
+  {date:"27/03",text:"את לא ההתמכרות שלך. את הרבה יותר מזה. הרבה יותר."},
+  {date:"28/03",text:"כל יום שאת בוחרת בחיים – את מנצחת. שוב ושוב ושוב."},
+  {date:"29/03",text:"הכאב שאת חשה כרגע? הוא לא קבוע. הוא עובר. תתמידי."},
+  {date:"30/03",text:"לגדול זה לא להיות מושלמת. לגדול זה להמשיך למרות הכל."},
+  {date:"31/03",text:"ההחלמה שלך מעוררת השראה גם אם את לא יודעת זאת עדיין."},
+  {date:"01/04",text:"בכל סדק שנוצר בך – כך נכנס האור. את האור. 🌟"},
+  {date:"02/04",text:"מי שנלחמת איתה כל יום – את. מי שניצחת כל יום – גם את."},
+];
+const EMOJI_REACTIONS = ["💙","🙏","💪","🌟","🤗","❤️","✨","🕊️","🌸","👏"];
+const STEPS_12 = [
+  "הודינו שאנחנו חסרי אונים","הגענו לאמונה בכוח גדול",
+  "מסרנו את רצוננו לאלוהים","עשינו חשבון נפש עמוק",
+  "הודינו את עוולותינו","נהיינו מוכנים לשינוי",
+  "ביקשנו להסיר חסרונות","עשינו רשימת פגועים",
+  "תיקנו ישירות","המשכנו חשבון נפש יומי",
+  "תפילה ומדיטציה","העברנו המסר הלאה"
+];
+
+// ── Storage ──────────────────────────────────────────────────
+const SK = "nahariya_v2";
+const load = () => { try { const r=localStorage.getItem(SK); return r?JSON.parse(r):null; } catch{return null;} };
+const save = (s) => { try { localStorage.setItem(SK,JSON.stringify(s)); } catch{} };
+
+const initSt = () => load() || { members:[], posts:[], nextId:1, currentUser:null };
+
+// ── Helpers ───────────────────────────────────────────────────
+const todayStr = () => { const d=new Date(); return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}`; };
+const byDate = (arr) => arr.find(x=>x.date===todayStr()) || arr[0];
+const fmtDate = () => new Date().toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+const cleanDays = (sd) => { const s=new Date(sd),n=new Date(); return Math.max(0,Math.floor((n-s)/86400000)); };
+const avatar = (name,grad,sz=36) => ({
+  width:sz,height:sz,borderRadius:"50%",
+  background:grad||"linear-gradient(135deg,#6c47ff,#2d1b69)",
+  display:"flex",alignItems:"center",justifyContent:"center",
+  color:"white",fontWeight:700,fontSize:sz*0.4,flexShrink:0
+});
+
+// ── SCREENS ───────────────────────────────────────────────────
+function Splash(){
+  return (
+    <div style={{fontFamily:"'Segoe UI',Arial,sans-serif",direction:"rtl",background:"linear-gradient(160deg,#0a0a1a,#1a0a3e)",height:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:18}}>
+      <div style={{fontSize:64}}>🕊️</div>
+      <div style={{color:"white",fontWeight:900,fontSize:26}}>קבוצת נהריה</div>
+      <div style={{color:"rgba(255,255,255,0.45)",fontSize:13}}>יחד נצליח • יום אחד בכל פעם</div>
+      <div style={{display:"flex",gap:6,marginTop:8}}>
+        {[0,1,2].map(i=><div key={i} style={{width:8,height:8,borderRadius:"50%",background:i===0?"#6c47ff":"rgba(255,255,255,0.2)"}}/>)}
+      </div>
+    </div>
+  );
+}
+
+function Login({onLogin}){
+  const [name,setName]=useState("");
+  const [date,setDate]=useState(new Date().toISOString().slice(0,10));
+  const go=()=>{ if(name.trim()) onLogin(name.trim(),date); };
+  return (
+    <div style={{fontFamily:"'Segoe UI',Arial,sans-serif",direction:"rtl",background:"linear-gradient(160deg,#0a0a1a,#1a0a3e)",minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24}}>
+      <div style={{fontSize:52,marginBottom:8}}>🕊️</div>
+      <div style={{color:"white",fontWeight:900,fontSize:22,marginBottom:4}}>קבוצת נהריה</div>
+      <div style={{color:"rgba(255,255,255,0.4)",fontSize:12,marginBottom:32}}>יחד נצליח</div>
+      <div style={{background:"rgba(255,255,255,0.05)",borderRadius:20,padding:26,width:"100%",maxWidth:340,border:"1px solid rgba(255,255,255,0.1)"}}>
+        <div style={{color:"white",fontWeight:700,fontSize:17,marginBottom:20,textAlign:"center"}}>כניסה / הרשמה</div>
+        <label style={{color:"rgba(255,255,255,0.6)",fontSize:12,display:"block",marginBottom:5}}>שם פרטי</label>
+        <input value={name} onChange={e=>setName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()}
+          placeholder="הכניסי שם פרטי..."
+          style={{width:"100%",padding:"11px 14px",borderRadius:10,border:"1px solid rgba(255,255,255,0.15)",background:"rgba(255,255,255,0.07)",color:"white",fontSize:14,marginBottom:16,direction:"rtl",outline:"none"}}/>
+        <label style={{color:"rgba(255,255,255,0.6)",fontSize:12,display:"block",marginBottom:5}}>תאריך תחילת ניקיון</label>
+        <input type="date" value={date} onChange={e=>setDate(e.target.value)}
+          style={{width:"100%",padding:"11px 14px",borderRadius:10,border:"1px solid rgba(255,255,255,0.15)",background:"rgba(255,255,255,0.07)",color:"white",fontSize:14,marginBottom:22,outline:"none"}}/>
+        <div style={{color:"rgba(255,255,255,0.3)",fontSize:11,marginBottom:14,lineHeight:1.6,textAlign:"center"}}>
+          💡 תאריך הניקיון נשמר אוטומטית.<br/>חברה חוזרת? הכניסי את שמך ותיכנסי ישר.
+        </div>
+        <button onClick={go} style={{background:"linear-gradient(135deg,#6c47ff,#0078d4)",color:"white",border:"none",padding:13,width:"100%",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer"}}>
+          כניסה לקבוצה 💙
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── MAIN APP ──────────────────────────────────────────────────
+function App(){
+  const [st,setSt]=useState(initSt);
+  const [screen,setScreen]=useState("splash");
+  const [tab,setTab]=useState("home");
+  const [shareText,setShareText]=useState("");
+  const [showEmoji,setShowEmoji]=useState(null);
+  const [aiMsg,setAiMsg]=useState("");
+  const [aiLoading,setAiLoading]=useState(false);
+
+  useEffect(()=>{
+    const saved=load();
+    setTimeout(()=>setScreen(saved?.currentUser?"main":"login"),1800);
+  },[]);
+
+  const commit=(next)=>{ setSt(next); save(next); };
+
+  const handleLogin=(name,startDate)=>{
+    const existing=st.members.find(m=>m.name.toLowerCase()===name.toLowerCase());
+    if(existing){
+      commit({...st,currentUser:existing});
+    } else {
+      const u={id:st.nextId,name,startDate,available:false};
+      commit({...st,members:[...st.members,u],currentUser:u,nextId:st.nextId+1});
+    }
+    setScreen("main");
+  };
+
+  const toggleAvail=()=>{
+    if(!st.currentUser)return;
+    const cu={...st.currentUser,available:!st.currentUser.available};
+    const members=st.members.map(m=>m.id===cu.id?cu:m);
+    commit({...st,members,currentUser:cu});
+  };
+
+  const submitPost=()=>{
+    if(!shareText.trim())return;
+    const p={id:st.nextId,author:st.currentUser.name,text:shareText,time:"עכשיו",reactions:{}};
+    commit({...st,posts:[p,...st.posts],nextId:st.nextId+1});
+    setShareText("");
+  };
+
+  const addReaction=(postId,emoji)=>{
+    const posts=st.posts.map(p=>{
+      if(p.id!==postId)return p;
+      const r={...p.reactions}; r[emoji]=(r[emoji]||0)+1;
+      return {...p,reactions:r};
+    });
+    commit({...st,posts});
+    setShowEmoji(null);
+  };
+
+  const generateAI=async()=>{
+    setAiLoading(true); setAiMsg("");
+    try{
+      const res=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,
+          messages:[{role:"user",content:"כתבי משפט השראה אחד קצר ומחזק לחברת קבוצת תמיכה להחלמה מהתמכרות. בעברית. משפט אחד בלבד, עד 25 מילה."}]})
+      });
+      const d=await res.json();
+      setAiMsg(d.content?.[0]?.text?.trim()||"");
+    }catch{setAiMsg("לא הצלחתי להתחבר, נסי שוב 💙");}
+    setAiLoading(false);
+  };
+
+  if(screen==="splash") return <Splash/>;
+  if(screen==="login") return <Login onLogin={handleLogin}/>;
+
+  const cu=st.currentUser;
+  const days=cleanDays(cu.startDate);
+  const available=st.members.filter(m=>m.available&&m.id!==cu.id);
+  const todayChapter=byDate(CHAPTERS);
+  const todayInspire=byDate(INSPIRATIONS);
+
+  const TABS=[
+    {id:"home",icon:"🏠",label:"בית"},
+    {id:"clean",icon:"✨",label:"ניקיון"},
+    {id:"share",icon:"💬",label:"שיתוף"},
+    {id:"power",icon:"🤝",label:"כוח גדול"},
+    {id:"chapter",icon:"📖",label:"פרק היום"},
+    {id:"inspire",icon:"🌟",label:"השראה"},
+  ];
+
+  const card=(children,extra={})=>({
+    background:"#12122a",borderRadius:16,padding:14,marginBottom:14,
+    border:"1px solid rgba(255,255,255,0.07)",...extra
+  });
+
+  return (
+    <div style={{fontFamily:"'Segoe UI',Arial,sans-serif",direction:"rtl",background:"#0a0a18",minHeight:"100vh",maxWidth:480,margin:"0 auto",paddingBottom:75}}>
+
+      {/* Header */}
+      <div style={{background:"linear-gradient(135deg,#12122a,#1e0a4e)",padding:"14px 16px 12px",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"1px solid rgba(255,255,255,0.08)"}}>
+        <div>
+          <div style={{color:"white",fontWeight:700,fontSize:15}}>🕊️ קבוצת נהריה</div>
+          <div style={{color:"rgba(255,255,255,0.4)",fontSize:11,marginTop:1}}>שלום {cu.name} 💙</div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <div onClick={toggleAvail} style={{background:"rgba(255,255,255,0.08)",borderRadius:20,padding:"4px 10px",display:"flex",alignItems:"center",gap:6,cursor:"pointer"}}>
+            <div style={{width:8,height:8,borderRadius:"50%",background:cu.available?"#48bb78":"#4a5568"}}/>
+            <span style={{color:"rgba(255,255,255,0.6)",fontSize:11}}>{cu.available?"פנויה":"לא פנויה"}</span>
+          </div>
+          <button onClick={()=>{commit({...st,currentUser:null});setScreen("login");}}
+            style={{background:"transparent",border:"1px solid rgba(255,255,255,0.15)",color:"rgba(255,255,255,0.5)",borderRadius:8,padding:"4px 8px",fontSize:11,cursor:"pointer"}}>יציאה</button>
+        </div>
+      </div>
+
+      <div style={{padding:"14px 14px 0"}}>
+
+        {/* HOME */}
+        {tab==="home"&&(
+          <div>
+            <div style={{background:"linear-gradient(135deg,#1a4731,#0d2b1e)",borderRadius:16,padding:20,marginBottom:14,border:"1px solid rgba(72,187,120,0.25)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div>
+                <div style={{color:"#9ae6b4",fontSize:12,marginBottom:4}}>ימי הניקיון שלי ✨</div>
+                <div style={{color:"white",fontSize:64,fontWeight:900,lineHeight:1}}>{days}</div>
+                <div style={{color:"rgba(255,255,255,0.45)",fontSize:12,marginTop:4}}>מאז {new Date(cu.startDate).toLocaleDateString("he-IL")}</div>
+              </div>
+              <div style={{textAlign:"center"}}>
+                <div style={{color:"rgba(255,255,255,0.5)",fontSize:11,marginBottom:8}}>פנויה לדיבור?</div>
+                <div onClick={toggleAvail} style={{width:52,height:28,background:cu.available?"#48bb78":"#2d3748",borderRadius:20,position:"relative",cursor:"pointer"}}>
+                  <div style={{width:22,height:22,background:"white",borderRadius:"50%",position:"absolute",top:3,left:cu.available?27:3,transition:"left 0.25s"}}/>
+                </div>
+                <div style={{color:cu.available?"#9ae6b4":"rgba(255,255,255,0.3)",fontSize:10,marginTop:4}}>{cu.available?"כן ✅":"לא"}</div>
+              </div>
+            </div>
+            <div style={{background:"linear-gradient(135deg,#2d1b69,#1a1050)",borderRadius:16,padding:16,marginBottom:14,border:"1px solid rgba(107,71,255,0.25)"}}>
+              <div style={{color:"#b794f4",fontSize:11,fontWeight:700,marginBottom:7}}>✨ משפט ההשראה להיום</div>
+              <div style={{color:"white",fontSize:14,lineHeight:1.8,fontStyle:"italic"}}>{todayInspire.text}</div>
+            </div>
+            {st.posts.length>0&&(
+              <div style={card()}>
+                <div style={{color:"white",fontWeight:700,marginBottom:10,fontSize:13}}>💬 שיתופים אחרונים</div>
+                {st.posts.slice(0,2).map(p=>(
+                  <div key={p.id} style={{padding:"9px 0",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
+                    <span style={{color:"#90cdf4",fontWeight:600,fontSize:12}}>{p.author}: </span>
+                    <span style={{color:"rgba(255,255,255,0.75)",fontSize:13}}>{p.text}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* CLEAN */}
+        {tab==="clean"&&(
+          <div>
+            <div style={{background:"linear-gradient(135deg,#1a4731,#0d2b1e)",borderRadius:16,padding:20,marginBottom:14,textAlign:"center",border:"1px solid rgba(72,187,120,0.25)"}}>
+              <div style={{color:"#9ae6b4",fontSize:13,marginBottom:6}}>ימי הניקיון שלי</div>
+              <div style={{color:"white",fontSize:72,fontWeight:900,lineHeight:1}}>{days}</div>
+              <div style={{color:"rgba(255,255,255,0.5)",fontSize:12,marginTop:6}}>{Math.floor(days/7)} שבועות ו-{days%7} ימים</div>
+            </div>
+            <div style={card()}>
+              <div style={{color:"white",fontWeight:700,marginBottom:12}}>🏆 אבני דרך</div>
+              {[{d:1,e:"🌱",l:"היום הראשון"},{d:7,e:"⭐",l:"שבוע"},{d:30,e:"🌟",l:"חודש"},{d:90,e:"💫",l:"3 חודשים"},{d:180,e:"🔥",l:"חצי שנה"},{d:365,e:"👑",l:"שנה שלמה"}].map((m,i)=>{
+                const pct=Math.min((days/m.d)*100,100);
+                return (
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"9px 0",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
+                    <span style={{fontSize:22}}>{m.e}</span>
+                    <div style={{flex:1}}>
+                      <div style={{color:days>=m.d?"white":"rgba(255,255,255,0.3)",fontSize:13}}>{m.d} ימים – {m.l}</div>
+                      <div style={{background:"rgba(255,255,255,0.08)",borderRadius:10,height:4,marginTop:5}}>
+                        <div style={{width:pct+"%",background:"linear-gradient(90deg,#48bb78,#9ae6b4)",height:4,borderRadius:10}}/>
+                      </div>
+                    </div>
+                    <span style={{fontSize:16}}>{days>=m.d?"✅":"🔒"}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={card()}>
+              <div style={{color:"white",fontWeight:700,marginBottom:12}}>👥 חברות הקבוצה</div>
+              {st.members.length===0&&<div style={{color:"rgba(255,255,255,0.3)",fontSize:13,textAlign:"center",padding:16}}>אין עדיין חברות נוספות</div>}
+              {[...st.members].sort((a,b)=>cleanDays(b.startDate)-cleanDays(a.startDate)).map((m,i)=>{
+                const grads=["linear-gradient(135deg,#f6ad55,#c05621)","linear-gradient(135deg,#a0aec0,#718096)","linear-gradient(135deg,#6c47ff,#2d1b69)"];
+                return (
+                  <div key={m.id} style={{display:"flex",alignItems:"center",gap:12,padding:"9px 0",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
+                    <div style={avatar(m.name,grads[Math.min(i,2)],38)}>{m.name[0]}</div>
+                    <div style={{flex:1}}>
+                      <div style={{color:"white",fontSize:13,fontWeight:600}}>{m.name}{m.id===cu.id?" (את)":""}</div>
+                      <div style={{background:"rgba(255,255,255,0.08)",borderRadius:10,height:3,marginTop:5}}>
+                        <div style={{width:Math.min((cleanDays(m.startDate)/365)*100,100)+"%",background:"linear-gradient(90deg,#48bb78,#68d391)",height:3,borderRadius:10}}/>
+                      </div>
+                    </div>
+                    <div style={{color:"#9ae6b4",fontWeight:700,fontSize:15}}>{cleanDays(m.startDate)}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* SHARE */}
+        {tab==="share"&&(
+          <div>
+            <div style={card()}>
+              <div style={{color:"white",fontWeight:700,marginBottom:10}}>💬 שתפי את הקבוצה</div>
+              <textarea value={shareText} onChange={e=>setShareText(e.target.value)}
+                placeholder="איך את מרגישה היום? שתפי בחופשיות..."
+                style={{width:"100%",minHeight:88,padding:"10px 12px",borderRadius:10,border:"1px solid rgba(255,255,255,0.15)",background:"rgba(255,255,255,0.05)",color:"white",fontSize:13,resize:"none",direction:"rtl",outline:"none"}}/>
+              <button onClick={submitPost} disabled={!shareText.trim()}
+                style={{background:shareText.trim()?"linear-gradient(135deg,#6c47ff,#0078d4)":"#2d3748",color:"white",border:"none",padding:10,width:"100%",borderRadius:10,fontWeight:700,fontSize:14,cursor:shareText.trim()?"pointer":"default",marginTop:10}}>
+                שתפי 💙
+              </button>
+            </div>
+            {st.posts.length===0&&<div style={{textAlign:"center",color:"rgba(255,255,255,0.3)",fontSize:14,padding:30}}>אין עדיין שיתופים<br/><span style={{fontSize:12}}>היי הראשונה לשתף ✨</span></div>}
+            {st.posts.map(p=>(
+              <div key={p.id} style={card()}>
+                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:9}}>
+                  <div style={avatar(p.author,null,34)}>{p.author[0]}</div>
+                  <div>
+                    <div style={{color:"white",fontWeight:600,fontSize:13}}>{p.author}</div>
+                    <div style={{color:"rgba(255,255,255,0.3)",fontSize:11}}>{p.time}</div>
+                  </div>
+                </div>
+                <div style={{color:"rgba(255,255,255,0.85)",fontSize:13,lineHeight:1.7,marginBottom:10}}>{p.text}</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8}}>
+                  {Object.entries(p.reactions).filter(([,c])=>c>0).map(([e,c])=>(
+                    <div key={e} onClick={()=>addReaction(p.id,e)} style={{background:"rgba(255,255,255,0.08)",borderRadius:20,padding:"3px 10px",fontSize:13,cursor:"pointer",color:"white"}}>{e} {c}</div>
+                  ))}
+                </div>
+                <button onClick={()=>setShowEmoji(showEmoji===p.id?null:p.id)}
+                  style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",color:"rgba(255,255,255,0.5)",padding:"5px 12px",borderRadius:20,fontSize:12,cursor:"pointer"}}>
+                  + הגיבי 😊
+                </button>
+                {showEmoji===p.id&&(
+                  <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:10,background:"rgba(255,255,255,0.05)",borderRadius:12,padding:10}}>
+                    {EMOJI_REACTIONS.map(e=><button key={e} onClick={()=>addReaction(p.id,e)} style={{fontSize:22,background:"transparent",border:"none",cursor:"pointer",padding:2}}>{e}</button>)}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* POWER */}
+        {tab==="power"&&(
+          <div>
+            <div style={{background:"linear-gradient(135deg,#1e3a5f,#0a1a3e)",borderRadius:16,padding:16,marginBottom:14,border:"1px solid rgba(144,205,244,0.2)"}}>
+              <div style={{color:"#90cdf4",fontWeight:700,fontSize:16,marginBottom:6}}>🤝 כוח גדול</div>
+              <div style={{color:"rgba(255,255,255,0.6)",fontSize:13,lineHeight:1.7}}>כשקשה – אין צורך לעבור את זה לבד.<br/>החברות הבאות פנויות לשיחת עזרה עכשיו:</div>
+            </div>
+            <div style={card()}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div>
+                  <div style={{color:"white",fontWeight:700,fontSize:14}}>האם את פנויה לעזור?</div>
+                  <div style={{color:"rgba(255,255,255,0.4)",fontSize:12,marginTop:2}}>חברות יוכלו לפנות אלייך</div>
+                </div>
+                <div onClick={toggleAvail} style={{width:54,height:28,background:cu.available?"#48bb78":"#2d3748",borderRadius:20,position:"relative",cursor:"pointer",flexShrink:0}}>
+                  <div style={{width:24,height:24,background:"white",borderRadius:"50%",position:"absolute",top:2,left:cu.available?28:2,transition:"left 0.25s"}}/>
+                </div>
+              </div>
+              {cu.available&&<div style={{marginTop:10,background:"rgba(72,187,120,0.12)",border:"1px solid rgba(72,187,120,0.3)",borderRadius:10,padding:"8px 12px",color:"#9ae6b4",fontSize:12}}>✅ את מסומנת כפנויה – תודה שאת שם!</div>}
+            </div>
+            <div style={card()}>
+              <div style={{color:"white",fontWeight:700,marginBottom:12,fontSize:14}}>🟢 פנויות עכשיו</div>
+              {available.length===0
+                ? <div style={{textAlign:"center",padding:"24px 0",color:"rgba(255,255,255,0.3)",fontSize:13,lineHeight:2}}>אין פנויות כרגע<br/><span style={{fontSize:12}}>סמני את עצמך כפנויה למעלה 💙</span></div>
+                : available.map(m=>(
+                  <div key={m.id} style={{display:"flex",alignItems:"center",gap:12,padding:"11px 0",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
+                    <div style={{position:"relative",flexShrink:0}}>
+                      <div style={{...avatar(m.name,"linear-gradient(135deg,#48bb78,#276749)",42)}}>{m.name[0]}</div>
+                      <div style={{position:"absolute",bottom:0,right:0,width:12,height:12,background:"#48bb78",borderRadius:"50%",border:"2px solid #12122a"}}/>
+                    </div>
+                    <div style={{flex:1}}>
+                      <div style={{color:"white",fontWeight:600,fontSize:14}}>{m.name}</div>
+                      <div style={{color:"#9ae6b4",fontSize:12}}>{cleanDays(m.startDate)} ימי ניקיון ✨</div>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        )}
+
+        {/* CHAPTER */}
+        {tab==="chapter"&&(
+          <div>
+            <div style={card()}>
+              <div style={{color:"rgba(255,255,255,0.4)",fontSize:12,marginBottom:4}}>{fmtDate()}</div>
+              <div style={{color:"#fbd38d",fontWeight:700,fontSize:18,marginBottom:2}}>📖 פרק היום</div>
+            </div>
+            <div style={{background:"linear-gradient(160deg,#1a1050,#0a0a2a)",borderRadius:16,padding:20,marginBottom:14,border:"1px solid rgba(107,71,255,0.3)",textAlign:"center"}}>
+              <div style={{color:"#b794f4",fontWeight:700,fontSize:20,marginBottom:14}}>{todayChapter.title}</div>
+              <div style={{width:40,height:2,background:"rgba(107,71,255,0.5)",borderRadius:10,margin:"0 auto 16px"}}/>
+              <div style={{color:"rgba(255,255,255,0.85)",fontSize:15,lineHeight:2}}>{todayChapter.text}</div>
+            </div>
+            <div style={card()}>
+              <div style={{color:"#9ae6b4",fontWeight:700,marginBottom:8,fontSize:13}}>💭 לתשומת לב</div>
+              <div style={{color:"rgba(255,255,255,0.6)",fontSize:13,lineHeight:1.8}}>הפרק מתחלף כל יום בחצות.<br/>קראי אותו לאט, תני לו להיכנס.<br/>אולי תרצי לשתף עם הקבוצה? 💙</div>
+            </div>
+          </div>
+        )}
+
+        {/* INSPIRE */}
+        {tab==="inspire"&&(
+          <div>
+            <div style={{background:"linear-gradient(135deg,#1a1050,#0a1a3e)",borderRadius:16,padding:20,marginBottom:14,textAlign:"center",border:"1px solid rgba(107,71,255,0.25)"}}>
+              <div style={{fontSize:40,marginBottom:12}}>🌟</div>
+              <div style={{color:"white",fontWeight:700,fontSize:16,marginBottom:4}}>משפט ההשראה להיום</div>
+              <div style={{color:"rgba(255,255,255,0.4)",fontSize:12}}>{fmtDate()}</div>
+            </div>
+            <div style={{background:"linear-gradient(160deg,#2d1b69,#1a0a4e)",borderRadius:16,padding:24,marginBottom:14,border:"1px solid rgba(107,71,255,0.3)",textAlign:"center"}}>
+              <div style={{color:"white",fontSize:18,fontWeight:600,lineHeight:1.9,fontStyle:"italic"}}>"{todayInspire.text}"</div>
+            </div>
+            <div style={card()}>
+              <div style={{color:"white",fontWeight:700,marginBottom:10,fontSize:13}}>✨ משפט השראה אישי מ-AI</div>
+              <button onClick={generateAI} disabled={aiLoading}
+                style={{background:aiLoading?"#2d3748":"linear-gradient(135deg,#6c47ff,#0078d4)",color:"white",border:"none",padding:11,width:"100%",borderRadius:10,fontWeight:700,fontSize:14,cursor:aiLoading?"default":"pointer",marginBottom:aiMsg?10:0}}>
+                {aiLoading?"🤖 כותב עבורך...":"🤖 צרי משפט השראה עם AI"}
+              </button>
+              {aiMsg&&<div style={{background:"rgba(107,71,255,0.15)",border:"1px solid rgba(107,71,255,0.3)",borderRadius:10,padding:14,color:"white",fontSize:14,lineHeight:1.8,fontStyle:"italic",textAlign:"center"}}>"{aiMsg}"</div>}
+            </div>
+            <div style={card()}>
+              <div style={{color:"white",fontWeight:700,marginBottom:12,fontSize:13}}>📋 12 הצעדים</div>
+              {STEPS_12.map((s,i)=>(
+                <div key={i} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.05)",alignItems:"flex-start"}}>
+                  <div style={{background:"linear-gradient(135deg,#6c47ff,#2d1b69)",color:"white",borderRadius:"50%",width:24,height:24,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,flexShrink:0}}>{i+1}</div>
+                  <div style={{color:"rgba(255,255,255,0.75)",fontSize:13,lineHeight:1.5}}>{s}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* Bottom nav */}
+      <div style={{position:"fixed",bottom:0,right:0,left:0,maxWidth:480,margin:"0 auto",background:"rgba(10,10,24,0.97)",borderTop:"1px solid rgba(255,255,255,0.08)",display:"flex",justifyContent:"space-around",padding:"6px 0"}}>
+        {TABS.map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)}
+            style={{background:"transparent",border:"none",display:"flex",flexDirection:"column",alignItems:"center",gap:2,cursor:"pointer",padding:"4px 6px",minWidth:52}}>
+            <span style={{fontSize:18}}>{t.icon}</span>
+            <span style={{fontSize:9,color:tab===t.id?"#b794f4":"rgba(255,255,255,0.3)",fontWeight:tab===t.id?700:400,whiteSpace:"nowrap"}}>{t.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("app")).render(<App/>);
+</script>
+</body>
+</html>
